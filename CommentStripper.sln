@@ -3,7 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentStripper", "CommentStripper\CommentStripper.csproj", "{ADE3B820-4F39-4D6D-A348-3E4977E15BAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{B5056DD2-76D0-453C-A07A-5D3912228505}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADE3B820-4F39-4D6D-A348-3E4977E15BAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADE3B820-4F39-4D6D-A348-3E4977E15BAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADE3B820-4F39-4D6D-A348-3E4977E15BAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADE3B820-4F39-4D6D-A348-3E4977E15BAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5056DD2-76D0-453C-A07A-5D3912228505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5056DD2-76D0-453C-A07A-5D3912228505}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5056DD2-76D0-453C-A07A-5D3912228505}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5056DD2-76D0-453C-A07A-5D3912228505}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
