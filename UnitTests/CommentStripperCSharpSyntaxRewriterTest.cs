@@ -22,6 +22,118 @@ namespace UnitTests
   public class CommentStripperCSharpSyntaxRewriterTest
   {
     [Test]
+    public void RemoveSingleLineCommentTrivia_WithCommentBeforeBody ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+          @"//Comment
+    public void MyMethod ()
+    {
+    }
+");
+
+      const string expectedTreeString =
+          @"public void MyMethod ()
+    {
+    }
+";
+    }
+
+    [Test]
+    public void RemoveSingleLineCommentTrivia_WithCommentInBody ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+    @"
+    public void MyMethod ()
+    {
+      var i = 0;
+      // Comment
+      i++;
+    }
+");
+
+      const string expectedTreeString =
+          @"
+    public void MyMethod ()
+    {
+      var i = 0;
+      i++;
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
+    public void RemoveSingleLineCommentTrivia_WithTwoCommentLinesInBody ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+    @"
+    public void MyMethod ()
+    {
+      var i = 0; // Comment
+      // Comment
+      i++;
+    }
+");
+
+      const string expectedTreeString =
+          @"
+    public void MyMethod ()
+    {
+      var i = 0;
+      i++;
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
+    public void RemoveSingleLineCommentTrivia_WithCommentAfterBodyAndEndOfLine ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+          @"public void MyMethod ()
+    {
+    }
+//Comment
+");
+
+      const string expectedTreeString =
+          @"public void MyMethod ()
+    {
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
+    public void RemoveSingleLineCommentTrivia_WithCommentAfterBodyAndNoEndOfLine ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+          @"public void MyMethod ()
+    {
+    }
+//Comment");
+
+      const string expectedTreeString =
+          @"public void MyMethod ()
+    {
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
     public void RemoveSingleLineCommentTrivia ()
     {
             var tree = CSharpSyntaxTree.ParseText (
@@ -45,23 +157,17 @@ namespace MyNamespace // Comment
 // Comment");
 
       const string expectedTreeString =
-          @"
-namespace MyNamespace 
-{ 
-  
-  public class MyClass 
-  { 
-    
-    public void MyMethod () 
-    { 
-      var i = 0; 
-      
+          @"namespace MyNamespace
+{
+  public class MyClass
+  {
+    public void MyMethod ()
+    {
+      var i = 0;
       i++;
-    } 
-    
-  } 
-  
-} 
+    }
+  }
+}
 ";
 
       var rewriter = new CommentStripperCSharpSyntaxRewriter();
