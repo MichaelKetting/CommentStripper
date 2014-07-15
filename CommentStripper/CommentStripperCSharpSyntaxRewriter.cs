@@ -28,7 +28,10 @@ namespace CommentStripper
     {
       ArgumentUtility.CheckNotNull ("trivia", trivia);
 
-      if (trivia.IsKind (SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind (SyntaxKind.MultiLineCommentTrivia))
+      if (trivia.IsKind (SyntaxKind.SingleLineCommentTrivia))
+        return new SyntaxTrivia();
+
+      if (trivia.IsKind (SyntaxKind.MultiLineCommentTrivia))
         return new SyntaxTrivia();
 
       return base.VisitTrivia (trivia);

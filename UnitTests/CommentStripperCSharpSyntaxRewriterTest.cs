@@ -68,6 +68,42 @@ namespace MyNamespace
 
       Assert.That (rewriter.Visit (tree.GetRoot()).ToFullString(), Is.EqualTo (expectedTreeString));
     }
+
+    [Test]
+    public void RemoveMultiLineCommentTrivia ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+    @"/* Comment
+*
+*/namespace MyNamespace /* Comment
+*/{ /* Comment
+*/public class MyClass /* Comment
+*
+*/{ /* Comment
+*
+**/ public void MyMethod () /* Comment
+*
+*/  { /* Comment
+*
+*/    var i = 0; /* Comment
+*
+*/    i++; /* Comment
+*
+*/ } /* Comment
+*
+*/ } /* Comment
+*
+*/ } /* Comment
+*
+*/");
+
+      const string expectedTreeString =
+          @"namespace MyNamespace { public class MyClass {  public void MyMethod ()   {     var i = 0;     i++;  }  }  } ";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
   }
 }
 
