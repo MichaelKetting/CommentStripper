@@ -11,31 +11,20 @@
 // FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 #endregion
+
 using System;
+using CommentStripper.Utilities;
+using Microsoft.CodeAnalysis;
 
 namespace CommentStripper
 {
-  internal class Program
+  public class SyntaxNodeHandler : ISyntaxNodeHandler
   {
-    private static int Main (string[] args)
+    public SyntaxNode Apply (SyntaxNode syntaxNode)
     {
-      if (args.Length != 1)
-      {
-        Console.WriteLine ("Please specify a CSPROJ-file.");
-        return -1;
-      }
+      ArgumentUtility.CheckNotNull ("syntaxNode", syntaxNode);
 
-      var projectFile = args[0];
-      var projectFileHandler = new ProjectFileHandler();
-      var sourceFileHandler = new CSharpSourceFileHandler();
-      var syntaxTreeHandler = new SyntaxNodeHandler();
-      foreach (var sourceFile in projectFileHandler.ReadAllSourceFiles (projectFile))
-      {
-        Console.WriteLine ("Processing source file '{0}'...", sourceFile);
-        sourceFileHandler.ApplySyntaxTreeTransformation (sourceFile, syntaxTreeHandler);
-      }
-
-      return 0;
+      return syntaxNode;
     }
   }
 }
