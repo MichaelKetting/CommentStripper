@@ -32,8 +32,11 @@ namespace CommentStripper
       var sourceFileData = ParseSourceFile (filePath);
       var encoding = sourceFileData.Item2;
       var syntaxTree = sourceFileData.Item1;
+      var syntaxNode = syntaxTree.GetRoot();
 
-      WriteTreeToSourceFile (filePath, encoding, syntaxTree.GetRoot());
+      syntaxNode = syntaxTreeHandler.Apply (syntaxNode);
+
+      WriteTreeToSourceFile (filePath, encoding, syntaxNode);
     }
 
     private Tuple<SyntaxTree, Encoding> ParseSourceFile (string filePath)

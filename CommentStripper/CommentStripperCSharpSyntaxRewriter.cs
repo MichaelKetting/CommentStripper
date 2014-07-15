@@ -18,22 +18,20 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace CommentStripper
 {
-  public class SyntaxNodeHandler : ISyntaxNodeHandler
+  public class CommentStripperCSharpSyntaxRewriter : CSharpSyntaxRewriter
   {
-    private readonly CSharpSyntaxRewriter _syntaxRewriter;
-
-    public SyntaxNodeHandler (CSharpSyntaxRewriter syntaxRewriter)
+    public CommentStripperCSharpSyntaxRewriter ()
     {
-      ArgumentUtility.CheckNotNull ("syntaxRewriter", syntaxRewriter);
-
-      _syntaxRewriter = syntaxRewriter;
     }
 
-    public SyntaxNode Apply (SyntaxNode syntaxNode)
+    public override SyntaxTrivia VisitTrivia (SyntaxTrivia trivia)
     {
-      ArgumentUtility.CheckNotNull ("syntaxNode", syntaxNode);
+      ArgumentUtility.CheckNotNull ("trivia", trivia);
 
-      return _syntaxRewriter.Visit (syntaxNode);
+      if (trivia.IsKind (SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind (SyntaxKind.MultiLineCommentTrivia))
+        return new SyntaxTrivia();
+
+      return base.VisitTrivia (trivia);
     }
   }
 }

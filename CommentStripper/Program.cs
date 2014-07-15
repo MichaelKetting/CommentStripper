@@ -28,7 +28,8 @@ namespace CommentStripper
       var projectFile = args[0];
       var projectFileHandler = new ProjectFileHandler();
       var sourceFileHandler = new CSharpSourceFileHandler();
-      var syntaxTreeHandler = new SyntaxNodeHandler();
+      var syntaxTreeHandler = new SyntaxNodeHandler(new CommentStripperCSharpSyntaxRewriter());
+
       foreach (var sourceFile in projectFileHandler.ReadAllSourceFiles (projectFile))
       {
         Console.WriteLine ("Processing source file '{0}'...", sourceFile);

@@ -12,28 +12,28 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 #endregion
 using System;
+using System.Linq;
+using CommentStripper;
 using CommentStripper.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace CommentStripper
+namespace UnitTests
 {
-  public class SyntaxNodeHandler : ISyntaxNodeHandler
+  /// <summary>
+  /// Alternative sample implementation to remove Comment Trivia
+  /// </summary>
+  public class CSharpCommentStrippingSyntaxNodeHandler : ISyntaxNodeHandler
   {
-    private readonly CSharpSyntaxRewriter _syntaxRewriter;
-
-    public SyntaxNodeHandler (CSharpSyntaxRewriter syntaxRewriter)
-    {
-      ArgumentUtility.CheckNotNull ("syntaxRewriter", syntaxRewriter);
-
-      _syntaxRewriter = syntaxRewriter;
-    }
-
     public SyntaxNode Apply (SyntaxNode syntaxNode)
     {
       ArgumentUtility.CheckNotNull ("syntaxNode", syntaxNode);
 
-      return _syntaxRewriter.Visit (syntaxNode);
+      var commentTrivia =
+          syntaxNode.DescendantTrivia()
+              .Where (t => t.IsKind (SyntaxKind.SingleLineCommentTrivia) || t.IsKind (SyntaxKind.MultiLineCommentTrivia));
+
+      return syntaxNode.ReplaceTrivia (commentTrivia, (t1, t2) => new SyntaxTrivia());
     }
   }
 }

@@ -12,28 +12,61 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 #endregion
 using System;
-using CommentStripper.Utilities;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using NUnit.Framework;
 
-namespace CommentStripper
+namespace UnitTests
 {
-  public class SyntaxNodeHandler : ISyntaxNodeHandler
+  [TestFixture]
+  public class CSharpCommentStrippingSyntaxNodeHandlerTest
   {
-    private readonly CSharpSyntaxRewriter _syntaxRewriter;
-
-    public SyntaxNodeHandler (CSharpSyntaxRewriter syntaxRewriter)
+    [Test]
+    public void RemoveSingleLineCommentTrivia ()
     {
-      ArgumentUtility.CheckNotNull ("syntaxRewriter", syntaxRewriter);
+            var tree = CSharpSyntaxTree.ParseText (
+          @"// Comment
+namespace MyNamespace // Comment
+{ // Comment
+  // Comment
+  public class MyClass // Comment
+  { // Comment
+    // Comment
+    public void MyMethod () // Comment
+    { // Comment
+      var i = 0; // Comment
+      // Comment
+      i++;
+    } // Comment
+    // Comment
+  } // Comment
+  // Comment
+} // Comment
+// Comment");
 
-      _syntaxRewriter = syntaxRewriter;
-    }
+      const string expectedTreeString =
+          @"
+namespace MyNamespace 
+{ 
+  
+  public class MyClass 
+  { 
+    
+    public void MyMethod () 
+    { 
+      var i = 0; 
+      
+      i++;
+    } 
+    
+  } 
+  
+} 
+";
 
-    public SyntaxNode Apply (SyntaxNode syntaxNode)
-    {
-      ArgumentUtility.CheckNotNull ("syntaxNode", syntaxNode);
+      var rewriter = new CSharpCommentStrippingSyntaxNodeHandler();
 
-      return _syntaxRewriter.Visit (syntaxNode);
+      Assert.That (rewriter.Apply (tree.GetRoot()).ToFullString(), Is.EqualTo (expectedTreeString));
     }
   }
 }
+
