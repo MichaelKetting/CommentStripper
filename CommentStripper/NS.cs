@@ -12,30 +12,12 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 #endregion
 using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace CommentStripper
 {
-  internal class Program
+  public static class NS
   {
-    private static int Main (string[] args)
-    {
-      if (args.Length != 1)
-      {
-        Console.WriteLine ("Please specify a CSPROJ-file.");
-        return -1;
-      }
-
-      var projectFile = args[0];
-      var projectFileHandler = new ProjectFileHandler();
-      foreach (var sourceFile in projectFileHandler.ReadAllSourceFiles (projectFile))
-      {
-        Console.WriteLine (sourceFile);
-      }
-
-      return 0;
-    }
+    public static readonly XNamespace Project = XNamespace.Get ("http://schemas.microsoft.com/developer/msbuild/2003");
   }
 }

@@ -12,30 +12,36 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 #endregion
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
+using CommentStripper.Utilities;
 
 namespace CommentStripper
 {
-  internal class Program
+  public class ProjectFileHandler
   {
-    private static int Main (string[] args)
+    /// <summary>
+    /// Returns a list of all cs-source files of the project.
+    /// </summary>
+    public IEnumerable<string> ReadAllSourceFiles (string projectFile)
     {
-      if (args.Length != 1)
-      {
-        Console.WriteLine ("Please specify a CSPROJ-file.");
-        return -1;
-      }
+      ArgumentUtility.CheckNotNullOrEmpty ("projectFile", projectFile);
 
-      var projectFile = args[0];
-      var projectFileHandler = new ProjectFileHandler();
-      foreach (var sourceFile in projectFileHandler.ReadAllSourceFiles (projectFile))
+      var projectDirectory = Path.GetDirectoryName (projectFile) ?? ".";
+      try
       {
-        Console.WriteLine (sourceFile);
+        return XDocument.Load (projectFile)
+            .Descendants().Where (d => d.Name == NS.Project + "Compile" && !d.Elements (NS.Project + "Link").Any())
+            .Attributes ("Include")
+            .Select (n => Path.Combine (projectDirectory, n.Value))
+            .OrderBy (f => f);
       }
-
-      return 0;
+      catch (Exception ex)
+      {
+        throw new InvalidOperationException (string.Format ("Unable to read included source files from project file '{0}'.", projectFile), ex);
+      }
     }
   }
 }

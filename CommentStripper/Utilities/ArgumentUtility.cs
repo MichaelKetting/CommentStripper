@@ -11,31 +11,29 @@
 // FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 #endregion
+
 using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CommentStripper
+namespace CommentStripper.Utilities
 {
-  internal class Program
+  public static class ArgumentUtility
   {
-    private static int Main (string[] args)
+    public static object CheckNotNull (string argumentName, object actualValue)
     {
-      if (args.Length != 1)
-      {
-        Console.WriteLine ("Please specify a CSPROJ-file.");
-        return -1;
-      }
+      if (actualValue == null)
+        throw new ArgumentNullException (argumentName);
 
-      var projectFile = args[0];
-      var projectFileHandler = new ProjectFileHandler();
-      foreach (var sourceFile in projectFileHandler.ReadAllSourceFiles (projectFile))
-      {
-        Console.WriteLine (sourceFile);
-      }
+      return actualValue;
+    }
 
-      return 0;
+    public static string CheckNotNullOrEmpty (string argumentName, string actualValue)
+    {
+      CheckNotNull (argumentName, actualValue);
+
+      if (actualValue.Length == 0)
+        throw new ArgumentException (String.Format ("String cannot be empty. Parameter name: {0}", argumentName));
+
+      return actualValue;
     }
   }
 }

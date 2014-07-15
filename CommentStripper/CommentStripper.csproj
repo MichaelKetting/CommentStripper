@@ -41,8 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProjectFileHandler.cs" />
+    <Compile Include="Utilities\ArgumentUtility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="NS.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\MIT.licenseheader">
