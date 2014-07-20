@@ -46,6 +46,10 @@ namespace CommentStripper
 
         stopwatch.Stop();
         Console.WriteLine ("Finished processing source files for '{0}'. Time taken: {1} seconds", file, stopwatch.Elapsed.TotalSeconds);
+        Console.WriteLine ();
+        Console.WriteLine ("NOTE: Only Comments for C#-files have been removed.");
+        Console.WriteLine ("NOTE: Comments at the start of the file have been left in the code as license-headers.");
+        Console.WriteLine ("NOTE: Comments on Designer-generated files have not been changed.");
         return 0;
       }
       catch (Exception ex)
