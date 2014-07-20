@@ -69,9 +69,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommentStripperCSharpSyntaxRewriter.cs" />
+    <Compile Include="IFileProvider.cs" />
     <Compile Include="ISyntaxNodeHandler.cs" />
-    <Compile Include="ProjectFileHandler.cs" />
+    <Compile Include="ProjectBasedFileProvider.cs" />
     <Compile Include="CSharpSourceFileHandler.cs" />
+    <Compile Include="SolutionBasedFileProvider.cs" />
+    <Compile Include="SourceFileBasedFileProvider.cs" />
     <Compile Include="SyntaxNodeHandler.cs" />
     <Compile Include="Utilities\ArgumentUtility.cs" />
     <Compile Include="Program.cs" />

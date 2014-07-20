@@ -20,28 +20,54 @@ using CommentStripper.Utilities;
 
 namespace CommentStripper
 {
-  public class ProjectFileHandler
+  public class ProjectBasedFileProvider : IFileProvider
   {
-    /// <summary>
-    /// Returns a list of all cs-source files of the project.
-    /// </summary>
-    public IEnumerable<string> ReadAllSourceFiles (string projectFile)
+    private readonly string _projectFile;
+
+    public ProjectBasedFileProvider (string projectFile)
     {
       ArgumentUtility.CheckNotNullOrEmpty ("projectFile", projectFile);
 
-      var projectDirectory = Path.GetDirectoryName (projectFile) ?? ".";
+
+      _projectFile = projectFile;
+    }
+
+    /// <summary>
+    /// Returns a list of all cs-source files of the project.
+    /// </summary>
+    public IEnumerable<string> ReadAllSourceFiles ()
+    {
+      var projectDirectory = Path.GetDirectoryName (_projectFile) ?? ".";
       try
       {
-        return XDocument.Load (projectFile)
-            .Descendants().Where (d => d.Name == NS.Project + "Compile" && !d.Elements (NS.Project + "Link").Any())
+        return XDocument.Load (_projectFile)
+            .Descendants()
+            .Where (d => d.Name == NS.Project + "Compile")
+            .Where (d => !IsLinkedSource (d))
+            .Where (d => !IsGeneratedSource (d))
             .Attributes ("Include")
             .Select (n => Path.Combine (projectDirectory, n.Value))
             .OrderBy (f => f);
       }
       catch (Exception ex)
       {
-        throw new InvalidOperationException (string.Format ("Unable to read included source files from project file '{0}'.", projectFile), ex);
+        throw new InvalidOperationException (string.Format ("Unable to read included source files from project file '{0}'.", _projectFile), ex);
       }
+    }
+
+    private static bool IsLinkedSource (XElement compileElement)
+    {
+      return compileElement.Elements (NS.Project + "Link").Any();
+    }
+
+    private static bool IsGeneratedSource (XElement compileElement)
+    {
+      // heuristic approach
+      bool isNamedDesigner = compileElement.Attributes ("Include")
+          .Any (v => ((string) v).EndsWith (".Designer.cs", StringComparison.InvariantCultureIgnoreCase));
+      bool isDependentFile = compileElement.Elements (NS.Project + "DependentUpon")
+          .Any (e => string.Equals (e.Value, "true", StringComparison.InvariantCultureIgnoreCase));
+      return isNamedDesigner && isDependentFile;
     }
   }
 }
