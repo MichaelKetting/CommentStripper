@@ -65,8 +65,7 @@ namespace CommentStripper
       // heuristic approach
       bool isNamedDesigner = compileElement.Attributes ("Include")
           .Any (v => ((string) v).EndsWith (".Designer.cs", StringComparison.InvariantCultureIgnoreCase));
-      bool isDependentFile = compileElement.Elements (NS.Project + "DependentUpon")
-          .Any (e => string.Equals (e.Value, "true", StringComparison.InvariantCultureIgnoreCase));
+      bool isDependentFile = compileElement.Elements (NS.Project + "DependentUpon").Any ();
       return isNamedDesigner && isDependentFile;
     }
   }
