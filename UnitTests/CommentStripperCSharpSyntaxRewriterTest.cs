@@ -22,20 +22,28 @@ namespace UnitTests
   public class CommentStripperCSharpSyntaxRewriterTest
   {
     [Test]
-    public void RemoveSingleLineCommentTrivia_WithCommentBeforeBody ()
+    public void RemoveSingleLineCommentTrivia_WithCommentBeforeBody_LeaveCommentsAsLicenseHeader ()
     {
       var tree = CSharpSyntaxTree.ParseText (
           @"//Comment
-    public void MyMethod ()
-    {
-    }
+using System;
+//Comment
+namespace MyNamspace
+{
+}
 ");
 
       const string expectedTreeString =
-          @"public void MyMethod ()
-    {
-    }
+          @"//Comment
+using System;
+namespace MyNamspace
+{
+}
 ";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
     }
 
     [Test]
@@ -138,6 +146,8 @@ namespace UnitTests
     {
             var tree = CSharpSyntaxTree.ParseText (
           @"// Comment
+using System; // Comment
+// Comment
 namespace MyNamespace // Comment
 { // Comment
   // Comment
@@ -154,10 +164,17 @@ namespace MyNamespace // Comment
   } // Comment
   // Comment
 } // Comment
-// Comment");
+// Comment
+namespace MyNamespace // Comment
+{ // Comment
+} // Comment
+// Comment
+");
 
       const string expectedTreeString =
-          @"namespace MyNamespace
+          @"// Comment
+using System;
+namespace MyNamespace
 {
   public class MyClass
   {
@@ -167,6 +184,9 @@ namespace MyNamespace // Comment
       i++;
     }
   }
+}
+namespace MyNamespace
+{
 }
 ";
 

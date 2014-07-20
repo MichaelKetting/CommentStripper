@@ -17,6 +17,7 @@ using System.Linq;
 using CommentStripper.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CommentStripper
 {
@@ -30,8 +31,8 @@ namespace CommentStripper
     {
       ArgumentUtility.CheckNotNull ("trivia", trivia);
 
-      if (trivia.IsKind (SyntaxKind.SingleLineCommentTrivia))
-        return new SyntaxTrivia ();
+      //if (trivia.IsKind (SyntaxKind.SingleLineCommentTrivia))
+      //  return new SyntaxTrivia ();
 
       if (trivia.IsKind (SyntaxKind.MultiLineCommentTrivia))
         return new SyntaxTrivia ();
@@ -39,15 +40,18 @@ namespace CommentStripper
       return base.VisitTrivia (trivia);
     }
 
-    /*
     public override SyntaxToken VisitToken (SyntaxToken token)
     {
       ArgumentUtility.CheckNotNull ("token", token);
 
-      var leadingTrivia = token.LeadingTrivia;
-      var newLeadingTrivia = RemoveCommentsFromTriva(leadingTrivia, true);
-      if (leadingTrivia.Count != newLeadingTrivia.Count)
-        token = token.WithLeadingTrivia (newLeadingTrivia);
+      bool isStartOfFile = token.FullSpan.Start == 0 && token.Parent != null && token.Parent.Parent is CompilationUnitSyntax;
+      if (!isStartOfFile)
+      {
+        var leadingTrivia = token.LeadingTrivia;
+        var newLeadingTrivia = RemoveCommentsFromTriva (leadingTrivia, true);
+        if (leadingTrivia.Count != newLeadingTrivia.Count)
+          token = token.WithLeadingTrivia (newLeadingTrivia);
+      }
 
       var trailingTrivia = token.TrailingTrivia;
       var newTrailingTriva = RemoveCommentsFromTriva (trailingTrivia, false);
@@ -88,6 +92,5 @@ namespace CommentStripper
       }
       return newTriviaList;
     }
-    */
   }
 }
