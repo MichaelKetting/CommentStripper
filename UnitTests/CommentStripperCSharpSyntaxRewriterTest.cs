@@ -74,6 +74,34 @@ namespace MyNamspace
     }
 
     [Test]
+    public void RemoveMultiLineCommentTrivia_WithCommentInBody ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+    @"
+    public void MyMethod ()
+    {
+      var i = 0;
+      /* Comment
+         Comment */
+      i++;
+    }
+");
+
+      const string expectedTreeString =
+          @"
+    public void MyMethod ()
+    {
+      var i = 0;
+      i++;
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
     public void RemoveSingleLineCommentTrivia_WithTwoCommentLinesInBody ()
     {
       var tree = CSharpSyntaxTree.ParseText (
@@ -92,6 +120,87 @@ namespace MyNamspace
     {
       var i = 0;
       i++;
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
+    public void RemoveMultiLineCommentTrivia_WithCommentLineInBodyStartingOnPreviousLine ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+    @"
+    public void MyMethod ()
+    {
+      var i = 0; /* Comment
+      Comment */
+      i++;
+    }
+");
+
+      const string expectedTreeString =
+          @"
+    public void MyMethod ()
+    {
+      var i = 0;
+      i++;
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
+    public void RemoveMultiLineCommentTrivia_WithCommentLineInBodyEndingOnNextLine ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+    @"
+    public void MyMethod ()
+    {
+      var i = 0;
+      /* Comment
+ */   i++;
+    }
+");
+
+      const string expectedTreeString =
+          @"
+    public void MyMethod ()
+    {
+      var i = 0;
+
+         i++;
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
+    public void RemoveMultiLineCommentTrivia_WithCommentLineInBodyStartingOnPreviousLineAndEndingOnNextLine ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+    @"
+    public void MyMethod ()
+    {
+      var i = 0; /* Comment
+ */   i++;
+    }
+");
+
+      const string expectedTreeString =
+          @"
+    public void MyMethod ()
+    {
+      var i = 0;
+    i++;
     }
 ";
 
@@ -122,6 +231,28 @@ namespace MyNamspace
     }
 
     [Test]
+    public void RemoveMultiLineCommentTrivia_WithCommentAfterBodyAndEndOfLine ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+          @"public void MyMethod ()
+    {
+    }
+/* Comment
+Comment */
+");
+
+      const string expectedTreeString =
+          @"public void MyMethod ()
+    {
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
     public void RemoveSingleLineCommentTrivia_WithCommentAfterBodyAndNoEndOfLine ()
     {
       var tree = CSharpSyntaxTree.ParseText (
@@ -129,6 +260,27 @@ namespace MyNamspace
     {
     }
 //Comment");
+
+      const string expectedTreeString =
+          @"public void MyMethod ()
+    {
+    }
+";
+
+      var rewriter = new CommentStripperCSharpSyntaxRewriter ();
+
+      Assert.That (rewriter.Visit (tree.GetRoot ()).ToFullString (), Is.EqualTo (expectedTreeString));
+    }
+
+    [Test]
+    public void RemoveMultiLineCommentTrivia_WithCommentAfterBodyAndNoEndOfLine ()
+    {
+      var tree = CSharpSyntaxTree.ParseText (
+          @"public void MyMethod ()
+    {
+    }
+/* Comment 
+Comment */");
 
       const string expectedTreeString =
           @"public void MyMethod ()
@@ -215,7 +367,7 @@ namespace MyNamespace
 *
 */    i++; /* Comment
 *
-*/ } /* Comment
+*/  } /* Comment
 *
 */ } /* Comment
 *
@@ -224,7 +376,20 @@ namespace MyNamespace
 */");
 
       const string expectedTreeString =
-          @"namespace MyNamespace { public class MyClass {  public void MyMethod ()   {     var i = 0;     i++;  }  }  } ";
+          @"/* Comment
+*
+*/namespace MyNamespace
+ {
+ public class MyClass
+ {
+  public void MyMethod ()
+   {
+     var i = 0;
+     i++;
+   }
+  }
+  }
+ ";
 
       var rewriter = new CommentStripperCSharpSyntaxRewriter ();
 

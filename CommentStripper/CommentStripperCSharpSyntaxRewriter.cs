@@ -27,19 +27,6 @@ namespace CommentStripper
     {
     }
 
-    public override SyntaxTrivia VisitTrivia (SyntaxTrivia trivia)
-    {
-      ArgumentUtility.CheckNotNull ("trivia", trivia);
-
-      //if (trivia.IsKind (SyntaxKind.SingleLineCommentTrivia))
-      //  return new SyntaxTrivia ();
-
-      if (trivia.IsKind (SyntaxKind.MultiLineCommentTrivia))
-        return new SyntaxTrivia ();
-
-      return base.VisitTrivia (trivia);
-    }
-
     public override SyntaxToken VisitToken (SyntaxToken token)
     {
       ArgumentUtility.CheckNotNull ("token", token);
@@ -48,20 +35,20 @@ namespace CommentStripper
       if (!isStartOfFile)
       {
         var leadingTrivia = token.LeadingTrivia;
-        var newLeadingTrivia = RemoveCommentsFromTriva (leadingTrivia, true);
-        if (leadingTrivia.Count != newLeadingTrivia.Count)
-          token = token.WithLeadingTrivia (newLeadingTrivia);
+        var newLeadingTrivia = RemoveSingleLineCommentsFromTriva (leadingTrivia, true);
+        newLeadingTrivia = RemoveMultiLineCommentsFromTriva (newLeadingTrivia, true);
+        token = token.WithLeadingTrivia (newLeadingTrivia);
       }
 
       var trailingTrivia = token.TrailingTrivia;
-      var newTrailingTriva = RemoveCommentsFromTriva (trailingTrivia, false);
-      if (trailingTrivia.Count != newTrailingTriva.Count)
-        token = token.WithTrailingTrivia (newTrailingTriva);
+      var newTrailingTriva = RemoveSingleLineCommentsFromTriva (trailingTrivia, false);
+      newTrailingTriva = RemoveMultiLineCommentsFromTriva (newTrailingTriva, false);
+      token = token.WithTrailingTrivia (newTrailingTriva);
 
       return base.VisitToken (token);
     }
 
-    private List<SyntaxTrivia> RemoveCommentsFromTriva (SyntaxTriviaList triviaList, bool removeEndOfLineTrivia)
+    private List<SyntaxTrivia> RemoveSingleLineCommentsFromTriva (IReadOnlyList<SyntaxTrivia> triviaList, bool removeEndOfLineTrivia)
     {
       var newTriviaList = new List<SyntaxTrivia>();
       for (int i = 0; i < triviaList.Count; i++)
@@ -76,7 +63,7 @@ namespace CommentStripper
                                                && nextTrivia.IsKind (SyntaxKind.EndOfLineTrivia);
 
         var isSingleLineCommentThenEndOfFile = currentTrivia.IsKind (SyntaxKind.SingleLineCommentTrivia)
-                                               && nextTrivia.IsKind (SyntaxKind.None) 
+                                               && nextTrivia.IsKind (SyntaxKind.None)
                                                && currentTrivia.Token.IsKind (SyntaxKind.EndOfFileToken);
 
         if (isWhitespaceThenSingleLineComment)
@@ -87,6 +74,54 @@ namespace CommentStripper
           continue;
         if (isSingleLineCommentThenEndOfFile)
           continue;
+
+        newTriviaList.Add (currentTrivia);
+      }
+      return newTriviaList;
+    }
+
+    private List<SyntaxTrivia> RemoveMultiLineCommentsFromTriva (IReadOnlyList<SyntaxTrivia> triviaList, bool removeEndOfLineTrivia)
+    {
+      var newTriviaList = new List<SyntaxTrivia>();
+      var triviaToKeep = new List<SyntaxTrivia>();
+      for (int i = 0; i < triviaList.Count; i++)
+      {
+        var currentTrivia = triviaList[i];
+        var nextTrivia = i + 1 < triviaList.Count ? triviaList[i + 1] : new SyntaxTrivia();
+
+        var isWhitespaceThenMultiLineComment = currentTrivia.IsKind (SyntaxKind.WhitespaceTrivia)
+                                               && nextTrivia.IsKind (SyntaxKind.MultiLineCommentTrivia);
+
+        var isMultiLineCommentThenEndOfLine = currentTrivia.IsKind (SyntaxKind.MultiLineCommentTrivia)
+                                              && nextTrivia.IsKind (SyntaxKind.EndOfLineTrivia);
+
+        var isMultiLineCommentThenEndOfFile = currentTrivia.IsKind (SyntaxKind.MultiLineCommentTrivia)
+                                              && nextTrivia.IsKind (SyntaxKind.None)
+                                              && currentTrivia.Token.IsKind (SyntaxKind.EndOfFileToken);
+
+        var isMultiLineComment = currentTrivia.IsKind (SyntaxKind.MultiLineCommentTrivia); // followed by non-removable syntax
+
+        if (isWhitespaceThenMultiLineComment)
+        {
+          triviaToKeep.Add (currentTrivia);
+          continue;
+        }
+        if (isMultiLineCommentThenEndOfLine && removeEndOfLineTrivia)
+          i++;
+        if (isMultiLineCommentThenEndOfLine)
+          continue;
+        if (isMultiLineCommentThenEndOfFile)
+          continue;
+        if (isMultiLineComment)
+        {
+          if (currentTrivia.ToString().Contains ("\n"))
+            triviaToKeep.Insert (0, SyntaxFactory.LineFeed);
+          if (currentTrivia.ToString().Contains ("\r"))
+            triviaToKeep.Insert (0, SyntaxFactory.CarriageReturn);
+          if (triviaToKeep.Any())
+            newTriviaList.AddRange (triviaToKeep);
+          continue;
+        }
 
         newTriviaList.Add (currentTrivia);
       }
