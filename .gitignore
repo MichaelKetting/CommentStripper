@@ -4,3 +4,4 @@
 **/*.user
 packages/**
 CommentStripper.sln.ide
+*.zip

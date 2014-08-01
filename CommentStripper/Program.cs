@@ -14,6 +14,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace CommentStripper
 {
@@ -51,6 +52,16 @@ namespace CommentStripper
         Console.WriteLine ("NOTE: Comments at the start of the file have been left in the code as license-headers.");
         Console.WriteLine ("NOTE: Comments on Designer-generated files have not been changed.");
         return 0;
+      }
+      catch (ReflectionTypeLoadException ex)
+      {
+        Console.WriteLine ("Error processing sources for file '{0}'.", file);
+        foreach (var loaderException in ex.LoaderExceptions)
+        {
+          Console.WriteLine (loaderException);
+          Console.WriteLine();
+        }
+        return -3;
       }
       catch (Exception ex)
       {
